@@ -126,59 +126,67 @@ for label in user_input_labels:
     print(f'Enter a numer for {label}')
     user_input[label] = float(input())
 
+
 def random_start_state():
-    return (random.randint(0,9),random.randint(0,9))
+    return (random.randint(0, 9), random.randint(0, 9))
 
 
-def generate_matrix(v):
-    x = {}
-    for c in range(10):
-        for r in range(10):
-            x[(r,c)] ={}
-            for a in ['up','down','left','right']:
-                x[(r,c)][a] = v
-    return x
+def generate_matrix(initialized_value):
+    new_matrix = {}
+    grid_size = 10
+    for col in range(grid_size):
+        for row in range(grid_size):
+            new_matrix[(row, col)] = {}
+            for action in ['up', 'down', 'left', 'right']:
+                new_matrix[(row, col)][action] = initialized_value
+    return new_matrix
+
 
 def choose_max_Q(Qs):
     maxA = ''
     maxQ = -1000
-    for a in ['up','down','left','right']:
-        if Qs[a]>maxQ:
+    for a in ['up', 'down', 'left', 'right']:
+        if Qs[a] > maxQ:
             maxQ = Qs[a]
             maxA = a
-    return maxA,maxQ
+    return maxA, maxQ
+
 
 def epsilon_greedy_policy(Q):
     policy = {}
     for c in range(10):
         for r in range(10):
-            policy[(r,c)] = choose_max_Q((Q[(r,c)]))            
+            policy[(r, c)] = choose_max_Q((Q[(r, c)]))
     return policy
 
-def generate_episode(p,env):
+
+def generate_episode(p, env):
     episode = []
     state = random_start_state()
     while True:
         action = p[state[1]][state[0]]
-        move = env.agent_makes_decision(action,state)
-        reward= move['reward']
-        episode.append([state,action,reward])
+        move = env.agent_makes_decision(action, state)
+        reward = move['reward']
+        episode.append([state, action, reward])
         state = move['location']
         if reward == 100:
             break
     return episode
 
+
 def mc_control():
     env = Environment()
-    Q , returns, pi= generate_matrix(0),generate_matrix([]), generate_matrix(0.25)
+    Q, returns, pi = generate_matrix(
+        0), generate_matrix([]), generate_matrix(0.25)
     policy = epsilon_greedy_policy(Q)
     for i in range(num_episodes):
         G = 0
-        episode = generate_episode(policy,env)
+        episode = generate_episode(policy, env)
         for i in range(len(episode)):
             a = episode[-i]
             G = g*G + a[1]
             print(a)
+
 
 # mc_control()
 print(generate_matrix(0.25))
