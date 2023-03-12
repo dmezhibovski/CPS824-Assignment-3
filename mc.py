@@ -114,7 +114,6 @@ class Environment():
 
 
 a = 0.1
-g = 0.9
 GAMMA = 0.9
 e = 0.1
 num_episodes = 5
@@ -176,7 +175,19 @@ def generate_episode(policy, env):
 
 
 def process_policy(episode, Q, returns):
-    pass
+    G = 0
+    state_actions = []
+    for i in range(len(episode)):
+        a = episode[len(episode)-i-1]
+        state_action = a[:2]
+        if state_action not in state_actions:
+            G = GAMMA*G + a[2]
+            state_actions.append(state_action)
+        else:
+            returns[state_action[0]][state_action[1]].append(G)
+            average = sum(returns[state_action[0]][state_action[1]])/len(returns[state_action[0]][state_action[1]])
+            Q[a[0]][a[1]] =  average  
+
 
 
 def update_policy():
