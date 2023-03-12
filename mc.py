@@ -117,6 +117,7 @@ a = 0.1
 g = 0.9
 GAMMA = 0.9
 e = 0.1
+EPSILON = 0.1
 num_episodes = 5
 
 standard_input = '1\n0'
@@ -179,8 +180,28 @@ def process_policy(episode, Q, returns):
     pass
 
 
-def update_policy():
-    pass
+def find_a_star(Q, state):
+    row, col = state
+    Q_at_cell = Q[(row, col)]
+    max_action = max(Q_at_cell.items(), key=lambda item: item[1])[0]
+    return max_action
+
+
+def make_new_policy_for_cell(a_star):
+    num_of_actions = 4
+    return {
+        'up': (1-EPSILON) + EPSILON/num_of_actions if a_star == 'up' else EPSILON/num_of_actions,
+        'down': (1-EPSILON) + EPSILON/num_of_actions if a_star == 'down' else EPSILON/num_of_actions,
+        'left': (1-EPSILON) + EPSILON/num_of_actions if a_star == 'left' else EPSILON/num_of_actions,
+        'right': (1-EPSILON) + EPSILON/num_of_actions if a_star == 'right' else EPSILON/num_of_actions,
+    }
+
+
+def update_policy(episode, Q, policy):
+    unique_states_in_episode = [e[0] for e in episode]
+    for state in unique_states_in_episode:
+        greedy_action = find_a_star(Q, state)
+        policy[state] = make_new_policy_for_cell(greedy_action)
 
 
 def mc_control():
