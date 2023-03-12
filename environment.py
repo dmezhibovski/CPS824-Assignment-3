@@ -1,4 +1,5 @@
 import random
+import unittest
 
 
 class Environment():
@@ -41,7 +42,7 @@ class Environment():
             self.walls[7][4] = ''  # door way 4
             self.walls[7][5] = ''  # door way 4
 
-    def agent_makes_decision(self, action, state):
+    def agent_makes_decision(self, action, state, unit_test_var=None, unit_test_left=None):
         '''
         action (string): 'up' or 'down' or 'left' or 'right
         state (tuple): pairwise (row,column) corrdinates
@@ -54,14 +55,16 @@ class Environment():
         }
         if not action in action_lookup:
             raise Exception("not recognized action!")
-        stocastic_decision = random.uniform(0, 1)
+        stocastic_decision = random.uniform(0, 1) if (
+            unit_test_var is None) else unit_test_var
         moves = []
         if stocastic_decision <= self.probability_go_to_desired:
             moves = [action_lookup[action]]
         elif stocastic_decision-self.probability_go_to_desired <= self.probability_stay:
             pass
         else:
-            choose_left = random.uniform(0, 1)
+            choose_left = random.uniform(0, 1) if (
+                unit_test_left is None) else unit_test_left
             if choose_left <= 0.5:
                 left_lookup = {
                     'up': 'l',
@@ -111,3 +114,66 @@ class Environment():
 # ////////////////////////////////
 # FINISHED ENVIRONMENT DECLARATION
 # ////////////////////////////////
+
+
+class TestMethods(unittest.TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(TestMethods, self).__init__(*args, **kwargs)
+        self.env = Environment()
+
+    def test_wall_desired(self):
+        results = self.env.agent_makes_decision('up', (5, 5), unit_test_var=0)
+        self.assertEqual(results['location'], (6, 5))
+        results = self.env.agent_makes_decision('up', (9, 5), unit_test_var=0)
+        self.assertEqual(results['location'], (9, 5))
+        results = self.env.agent_makes_decision('up', (4, 5), unit_test_var=0)
+        self.assertEqual(results['location'], (4, 5))
+        results = self.env.agent_makes_decision(
+            'left', (0, 0), unit_test_var=0)
+        self.assertEqual(results['location'], (0, 0))
+        results = self.env.agent_makes_decision(
+            'right', (0, 0), unit_test_var=0)
+        self.assertEqual(results['location'], (0, 1))
+        results = self.env.agent_makes_decision(
+            'down', (0, 0), unit_test_var=0)
+        self.assertEqual(results['location'], (0, 0))
+
+    def test_wall_stay(self):
+        results = self.env.agent_makes_decision(
+            'up', (4, 5), unit_test_var=0.4)
+        self.assertEqual(results['location'], (4, 5))
+        results = self.env.agent_makes_decision(
+            'down', (4, 5), unit_test_var=0.4)
+        self.assertEqual(results['location'], (4, 5))
+        results = self.env.agent_makes_decision(
+            'right', (4, 5), unit_test_var=0.4)
+        self.assertEqual(results['location'], (4, 5))
+        results = self.env.agent_makes_decision(
+            'left', (4, 5), unit_test_var=0.4)
+        self.assertEqual(results['location'], (4, 5))
+
+    def test_wall_side_step(self):
+        results = self.env.agent_makes_decision(
+            'up', (5, 5), unit_test_var=0.5, unit_test_left=0)
+        self.assertEqual(results['location'], (6, 5))
+        results = self.env.agent_makes_decision(
+            'up', (5, 5), unit_test_var=0.5, unit_test_left=1)
+        self.assertEqual(results['location'], (6, 6))
+        results = self.env.agent_makes_decision(
+            'up', (4, 2), unit_test_var=0.5, unit_test_left=0)
+        self.assertEqual(results['location'], (5, 1))
+        results = self.env.agent_makes_decision(
+            'left', (4, 2), unit_test_var=0.5, unit_test_left=1)
+        self.assertEqual(results['location'], (4, 1))
+
+    def test_reward(self):
+        results = self.env.agent_makes_decision(
+            'up', (3, 4), unit_test_var=0.5, unit_test_left=0)
+        self.assertEqual(results['reward'], -1)
+        results = self.env.agent_makes_decision('up', (8, 9), unit_test_var=0)
+        self.assertEqual(results['reward'], 100)
+
+
+if __name__ == '__main__':
+    unittest.main()
