@@ -126,17 +126,18 @@ for label in user_input_labels:
     print(f'Enter a numer for {label}')
     user_input[label] = float(input())
 
-def generate_Q_and_returns():
-    Q = {}
-    returns = {}
+def random_start_state():
+    return (random.randint(0,9),random.randint(0,9))
+
+
+def generate_matrix(v):
+    x = {}
     for c in range(10):
         for r in range(10):
-            Q[(r,c)] ={}
-            returns[(r,c)]={}
+            x[(r,c)] ={}
             for a in ['up','down','left','right']:
-                Q[(r,c)][a] = 0
-                returns[(r,c)][a] = []
-    return Q , returns
+                x[(r,c)][a] = v
+    return x
 
 def choose_max_Q(Qs):
     maxA = ''
@@ -156,19 +157,20 @@ def epsilon_greedy_policy(Q):
 
 def generate_episode(p,env):
     episode = []
-    state = (random.randint(0,9),random.randint(0,9))
-    reward = 0
-    while reward != 0:
+    state = random_start_state()
+    while True:
         action = p[state[1]][state[0]]
         move = env.agent_makes_decision(action,state)
         reward= move['reward']
         episode.append([state,action,reward])
         state = move['location']
+        if reward == 100:
+            break
     return episode
 
 def mc_control():
     env = Environment()
-    Q , returns= generate_Q_and_returns()
+    Q , returns, pi= generate_matrix(0),generate_matrix([]), generate_matrix(0.25)
     policy = epsilon_greedy_policy(Q)
     for i in range(num_episodes):
         G = 0
@@ -179,4 +181,4 @@ def mc_control():
             print(a)
 
 # mc_control()
-print(epsilon_greedy_policy(generate_Q_and_returns()))
+print(generate_matrix(0.25))
