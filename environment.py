@@ -79,11 +79,7 @@ class Environment():
                 }
                 moves = [action_lookup[action], right_lookup[action]]
 
-        if len(moves) == 0:
-            # stay
-            pass
-        else:
-            self.agent_moves(moves=moves, state=state)
+        return self.agent_moves(moves=moves, state=state)
 
     def agent_moves(self, moves, state):
         '''
@@ -102,9 +98,16 @@ class Environment():
                 row, col = move_effect[move](row, col)
 
         if row == self.goal_square[0] and col == self.goal_square[1]:
-            return 100
+            return {
+                'reward': 100,
+                'location': (row, col)
+            }
         else:
-            return -1
+            return {
+                'reward': -1,
+                'location': (row, col)
+            }
 
-
-my_environment = Environment()
+# ////////////////////////////////
+# FINISHED ENVIRONMENT DECLARATION
+# ////////////////////////////////
