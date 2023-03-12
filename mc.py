@@ -177,18 +177,18 @@ def generate_episode(policy, env):
 
 def process_policy(episode, Q, returns):
     G = 0
-    state_actions = []
-    for i in range(len(episode)):
-        a = episode[len(episode)-i-1]
-        state_action = a[:2]
-        if state_action not in state_actions:
-            G = GAMMA*G + a[2]
-            state_actions.append(state_action)
-        else:
-            returns[state_action[0]][state_action[1]].append(G)
-            average = sum(returns[state_action[0]][state_action[1]])/len(returns[state_action[0]][state_action[1]])
-            Q[a[0]][a[1]] =  average  
-
+    previous_state_actions = set()
+    episode_return_values = []
+    for state, action, reward in episode[::-1]:
+        G = GAMMA*G + reward
+        episode_return_values.append([state, action, G])
+    episode_return_values.reverse()
+    for state, action, return_value in episode_return_values:
+        if not state in previous_state_actions:
+            previous_state_actions.add(state)
+            returns[state][action].append(return_value)
+            Q[state][action] = sum(returns[state][action]) / \
+                len(returns[state][action])
 
 
 def find_a_star(Q, state):
