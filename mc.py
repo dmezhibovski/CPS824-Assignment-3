@@ -116,6 +116,7 @@ class Environment():
 a = 0.1
 g = 0.9
 e = 0.1
+num_episodes = 5
 
 standard_input = '1\n0'
 user_input = {}
@@ -124,3 +125,58 @@ user_input_labels = ['p1', 'p2']
 for label in user_input_labels:
     print(f'Enter a numer for {label}')
     user_input[label] = float(input())
+
+def generate_Q_and_returns():
+    Q = {}
+    returns = {}
+    for c in range(10):
+        for r in range(10):
+            Q[(r,c)] ={}
+            returns[(r,c)]={}
+            for a in ['up','down','left','right']:
+                Q[(r,c)][a] = 0
+                returns[(r,c)][a] = []
+    return Q , returns
+
+def choose_max_Q(Qs):
+    maxA = ''
+    maxQ = -1000
+    for a in ['up','down','left','right']:
+        if Qs[a]>maxQ:
+            maxQ = Qs[a]
+            maxA = a
+    return maxA,maxQ
+
+def epsilon_greedy_policy(Q):
+    policy = {}
+    for c in range(10):
+        for r in range(10):
+            policy[(r,c)] = choose_max_Q((Q[(r,c)]))            
+    return policy
+
+def generate_episode(p,env):
+    episode = []
+    state = (random.randint(0,9),random.randint(0,9))
+    reward = 0
+    while reward != 0:
+        action = p[state[1]][state[0]]
+        move = env.agent_makes_decision(action,state)
+        reward= move['reward']
+        episode.append([state,action,reward])
+        state = move['location']
+    return episode
+
+def mc_control():
+    env = Environment()
+    Q , returns= generate_Q_and_returns()
+    policy = epsilon_greedy_policy(Q)
+    for i in range(num_episodes):
+        G = 0
+        episode = generate_episode(policy,env)
+        for i in range(len(episode)):
+            a = episode[-i]
+            G = g*G + a[1]
+            print(a)
+
+# mc_control()
+print(epsilon_greedy_policy(generate_Q_and_returns()))
