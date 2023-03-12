@@ -131,14 +131,14 @@ def random_start_state():
     return (random.randint(0, 9), random.randint(0, 9))
 
 
-def generate_matrix(initialized_value):
+def generate_matrix(initialized_value_func):
     new_matrix = {}
     grid_size = 10
     for col in range(grid_size):
         for row in range(grid_size):
             new_matrix[(row, col)] = {}
             for action in ['up', 'down', 'left', 'right']:
-                new_matrix[(row, col)][action] = initialized_value
+                new_matrix[(row, col)][action] = initialized_value_func()
     return new_matrix
 
 
