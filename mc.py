@@ -1,4 +1,5 @@
 import random
+import time
 
 
 class Environment():
@@ -118,6 +119,7 @@ GAMMA = 0.9
 e = 0.1
 EPSILON = 0.1
 num_episodes = 200
+recorded_times = []
 
 standard_input = '1\n0\n'
 user_input = {}
@@ -223,18 +225,24 @@ def mc_control():
     Q = generate_matrix(-10)
     returns = generate_matrix([])
     policy = generate_matrix(0.25)
-
+    last_time = time.time()
     for i in range(num_episodes):
         episode = generate_episode(policy, env)
         process_policy(episode, Q, returns)
         update_policy(episode, Q, policy)
         print(f"done {i} with len {len(episode)}")
+        time_delta = time.time() - last_time
+        recorded_times.append((i, time_delta))
+        last_time = time.time()
     print_q = {}
     for key, value in Q.items():
         print_q[str(key)] = value
     print(print_q)
 
 
+start_time = time.time()
 print('start')
 mc_control()
 print('done')
+print(
+    f"Esapsed time {time.time() - start_time} with times of \n{recorded_times}")

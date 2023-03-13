@@ -1,4 +1,5 @@
 import random
+import time
 
 
 class Environment():
@@ -119,6 +120,7 @@ e = 0.1
 NUM_EPISODES = 100
 ALPHA = 0.1
 GAMMA = 0.9
+recorded_times = []
 
 standard_input = '1\n0'
 user_input = {}
@@ -191,9 +193,15 @@ def Q_learning():
             state = state_prime
             if state == (9, 9):
                 break
+        time_delta = time.time() - last_time
+        recorded_times.append((i, time_delta))
+        last_time = time.time()
     return Q
 
 
+start_time = time.time()
 Q = Q_learning()
 
 see_action_values(Q)
+print(
+    f"Esapsed time {time.time() - start_time} with times of \n{recorded_times}")
