@@ -206,6 +206,7 @@ def expected_value_of_Q(Q, state):
 def expected_sarsa():
     env = Environment()
     Q = generate_matrix(0)
+    last_time = time.time()
     for i in range(NUM_EPISODES):
         starting_point = random_start_state()
         state = starting_point
