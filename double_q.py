@@ -119,7 +119,7 @@ GAMMA = 0.9
 EPSILON = 0.1
 
 num_episodes = 500
-recorded_times = []
+recorded_times_double = []
 
 standard_input = '1\n0'
 user_input = {}
@@ -163,43 +163,75 @@ def choose_max_Q(Qs):
 def see_action_values(Q):
     for c in range(10):
         for r in range(10):
-            best_action, best_action_value = choose_max_Q(Q[(r, 9-c)])
+            best_action, best_action_value = choose_max_Q(Q[(r,9- c)])
             print('%.2f' % (best_action_value)+' ', end='')
             # print('%s' % (best_action)+' ',end='')
         print('\n')
 
+def choose_max_Q_double(Qs1, Qs2):
+    maxA = ''
+    maxQ = -1000
+    actions = ['up', 'down', 'left', 'right']
+    if random.random() < EPSILON:
+        maxA = actions[random.randint(0, 3)]
+        return maxA, Qs1[maxA]
+    for a in actions:
+        if Qs1[a]+Qs2[a] > maxQ:
+            maxQ = Qs1[a]+Qs2[a]
+            maxA = a
 
-def Q_learning():
+    return maxA, maxQ
+
+
+def double_Q_learning():
     env = Environment()
-    Q = generate_matrix(0)
+    Q1 = generate_matrix(0)
+    Q2 = generate_matrix(0)
     last_time = time.time()
     for i in range(num_episodes):
         starting_point = random_start_state()
         state = starting_point
         steps = 0
         while True:
-            if state == (9, 9):
-                break
-            best_action, best_action_value = choose_max_Q(Q[state])
+            best_action, best_action_value = choose_max_Q_double(
+                Q1[state], Q2[state])
             move = env.agent_makes_decision(best_action, state)
             state_prime = move['location']
-            max_next_action, max_next_state_action_value = choose_max_Q(
-                Q[state_prime])
-            learning_step_value = ALPHA * \
-                (move['reward']+GAMMA*max_next_state_action_value-best_action_value)
-            Q[state][best_action] = Q[state][best_action] + learning_step_value
-            state = move['location']
+            max_next_action1, max_next_state_action_value1 = choose_max_Q(
+                Q1[state_prime])
+            max_next_action2, max_next_state_action_valu2 = choose_max_Q(
+                Q2[state_prime])
+
+            if state == (9, 9):
+                break
+
+            if random.random() < 0.5:
+                learning_step_value = ALPHA * \
+                    (move['reward']+GAMMA*Q2[state_prime]
+                     [max_next_action1]-Q1[state][best_action])
+                Q1[state][best_action] = Q1[state][best_action] + \
+                    learning_step_value
+                state = move['location']
+            else:
+                learning_step_value = ALPHA * \
+                    (move['reward']+GAMMA*Q1[state_prime]
+                     [max_next_action2]-Q2[state][best_action])
+                Q2[state][best_action] = Q2[state][best_action] + \
+                    learning_step_value
+                state = move['location']
             steps += 1
-        # print(steps)
         time_delta = time.time() - last_time
-        recorded_times.append((i, time_delta))
+        recorded_times_double.append((i, time_delta))
         last_time = time.time()
-    return Q
+
+        # print(steps)
+    return Q1, Q2
 
 
 start_time = time.time()
-Q = Q_learning()
+Q1, Q2 = double_Q_learning()
 
-see_action_values(Q)
+see_action_values(Q1)
 print('\n')
-print(f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
+see_action_values(Q2)
+print(f"lsapsed time {time.time() - start_time} with times of \n{recorded_times_double}")

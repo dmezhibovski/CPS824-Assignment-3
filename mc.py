@@ -245,4 +245,4 @@ print('start')
 mc_control()
 print('done')
 print(
-    f"Esapsed time {time.time() - start_time} with times of \n{recorded_times}")
+    f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")

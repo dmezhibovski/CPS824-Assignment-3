@@ -116,8 +116,8 @@ class Environment():
 
 a = 0.1
 g = 0.9
-e = 0.1
-NUM_EPISODES = 100
+EPSILON = 0.1
+NUM_EPISODES = 500
 ALPHA = 0.1
 GAMMA = 0.9
 recorded_times = []
@@ -149,17 +149,22 @@ def random_start_state():
 def choose_max_Q(Qs):
     maxA = ''
     maxQ = -1000
-    for a in ['up', 'down', 'left', 'right']:
+    actions = ['up', 'down', 'left', 'right']
+    if random.random() < EPSILON:
+        maxA = actions[random.randint(0, 3)]
+        return maxA, Qs[maxA]
+    for a in actions:
         if Qs[a] > maxQ:
             maxQ = Qs[a]
             maxA = a
+
     return maxA, maxQ
 
 
 def see_action_values(Q):
     for c in range(10):
         for r in range(10):
-            best_action, best_action_value = choose_max_Q(Q[(r, c)])
+            best_action, best_action_value = choose_max_Q(Q[(r, 9-c)])
             print('%.2f' % (best_action_value)+' ', end='')
             # print('%s' % (best_action)+' ',end='')
         print('\n')
@@ -175,6 +180,7 @@ def find_a_star(Q, state):
 def sarsa():
     env = Environment()
     Q = generate_matrix(0)
+    last_time = time.time()
     for i in range(NUM_EPISODES):
         starting_point = random_start_state()
         state = starting_point
@@ -182,7 +188,8 @@ def sarsa():
             best_action = max(Q[state].items(), key=lambda item: item[1])[
                 0]  # make e-greedy
             move = env.agent_makes_decision(best_action, state)
-
+            if state == (9, 9):
+                break
             state_prime = move['location']
             max_next_action = max(Q[state_prime].items(),
                                   key=lambda item: item[1])[0]
@@ -191,8 +198,6 @@ def sarsa():
                  [max_next_action]-Q[state][best_action])
             Q[state][best_action] = Q[state][best_action] + learning_step_value
             state = state_prime
-            if state == (9, 9):
-                break
         time_delta = time.time() - last_time
         recorded_times.append((i, time_delta))
         last_time = time.time()
@@ -203,5 +208,4 @@ start_time = time.time()
 Q = sarsa()
 
 see_action_values(Q)
-print(
-    f"Esapsed time {time.time() - start_time} with times of \n{recorded_times}")
+print(f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
