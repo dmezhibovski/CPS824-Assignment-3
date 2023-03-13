@@ -172,7 +172,7 @@ def find_a_star(Q, state):
     return max_action
 
 
-def Q_learning():
+def sarsa():
     env = Environment()
     Q = generate_matrix(0)
     for i in range(NUM_EPISODES):
@@ -200,7 +200,7 @@ def Q_learning():
 
 
 start_time = time.time()
-Q = Q_learning()
+Q = sarsa()
 
 see_action_values(Q)
 print(
