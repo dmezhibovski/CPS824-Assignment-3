@@ -119,6 +119,7 @@ e = 0.1
 NUM_EPISODES = 100
 ALPHA = 0.1
 GAMMA = 0.9
+EPSILON = 0.1
 
 standard_input = '1\n0'
 user_input = {}
@@ -163,11 +164,40 @@ def see_action_values(Q):
         print('\n')
 
 
+def choose_max_Q(Qs):
+    maxA = ''
+    maxQ = -1000
+    for a in ['up', 'down', 'left', 'right']:
+        if Qs[a] > maxQ:
+            maxQ = Qs[a]
+            maxA = a
+    return maxA, maxQ
+
+
 def find_a_star(Q, state):
     row, col = state
     Q_at_cell = Q[(row, col)]
     max_action = max(Q_at_cell.items(), key=lambda item: item[1])[0]
     return max_action
+
+
+def make_new_policy_for_cell(a_star):
+    num_of_actions = 4
+    return {
+        'up': (1-EPSILON) + EPSILON/num_of_actions if a_star == 'up' else EPSILON/num_of_actions,
+        'down': (1-EPSILON) + EPSILON/num_of_actions if a_star == 'down' else EPSILON/num_of_actions,
+        'left': (1-EPSILON) + EPSILON/num_of_actions if a_star == 'left' else EPSILON/num_of_actions,
+        'right': (1-EPSILON) + EPSILON/num_of_actions if a_star == 'right' else EPSILON/num_of_actions,
+    }
+
+
+def expected_value_of_Q(Q, state):
+    aStar = find_a_star(Q, state)
+    policy = make_new_policy_for_cell(aStar)
+    total = 0
+    for key, val in policy.items():
+        total += Q[state][key] * val
+    return total
 
 
 def Q_learning():
@@ -185,8 +215,8 @@ def Q_learning():
             max_next_action = max(Q[state_prime].items(),
                                   key=lambda item: item[1])[0]
             learning_step_value = ALPHA * \
-                (move['reward']+GAMMA*Q[state_prime]
-                 [max_next_action]-Q[state][best_action])
+                (move['reward']+GAMMA*expected_value_of_Q(Q,
+                 state_prime)-Q[state][best_action])
             Q[state][best_action] = Q[state][best_action] + learning_step_value
             state = state_prime
             if state == (9, 9):
