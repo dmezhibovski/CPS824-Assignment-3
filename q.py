@@ -113,9 +113,11 @@ class Environment():
 # ////////////////////////////////
 
 
-a = 0.1
-g = 0.9
-e = 0.1
+ALPHA = 0.1
+GAMMA = 0.9
+EPSILON = 0.1
+
+num_episodes = 500
 
 standard_input = '1\n0'
 user_input = {}
@@ -124,3 +126,56 @@ user_input_labels = ['p1', 'p2']
 for label in user_input_labels:
     print(f'Enter a numer for {label}')
     user_input[label] = float(input())
+
+def generate_matrix(initialized_value):
+    new_matrix = {}
+    grid_size = 10
+    for col in range(grid_size):
+        for row in range(grid_size):
+            new_matrix[(row, col)] = {}
+            for action in ['up', 'down', 'left', 'right']:
+                new_matrix[(row, col)][action] = initialized_value
+    return new_matrix
+
+
+def random_start_state():
+    return (random.randint(0, 9), random.randint(0, 9))
+
+def choose_max_Q(Qs):
+    maxA = ''
+    maxQ = -1000
+    for a in ['up', 'down', 'left', 'right']:
+        if Qs[a] > maxQ:
+            maxQ = Qs[a]
+            maxA = a
+    return maxA, maxQ
+
+def see_action_values(Q):
+    for c in range(10):
+        for r in range(10):
+            best_action, best_action_value = choose_max_Q(Q[(r,c)])
+            print('%.2f' % (best_action_value)+' ',end='')
+            # print('%s' % (best_action)+' ',end='')
+        print('\n')
+
+def Q_learning():
+    env = Environment()
+    Q = generate_matrix(0)
+    for i in range(num_episodes):
+        starting_point = random_start_state()
+        state = starting_point
+        while True:
+            best_action,best_action_value = choose_max_Q(Q[state])
+            move = env.agent_makes_decision(best_action, state)
+            state_prime = move['location']
+            max_next_action ,max_next_state_action_value = choose_max_Q(Q[state_prime])
+            learning_step_value = ALPHA*(move['reward']+GAMMA*max_next_state_action_value-best_action_value)
+            Q[state][best_action] = Q[state][best_action] + learning_step_value
+            state = move['location']
+            if state == (9,9):
+                break
+    return Q
+
+Q = Q_learning()
+
+see_action_values(Q)
