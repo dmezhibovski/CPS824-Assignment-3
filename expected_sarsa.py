@@ -202,7 +202,7 @@ def expected_value_of_Q(Q, state):
     return total
 
 
-def Q_learning():
+def expected_sarsa():
     env = Environment()
     Q = generate_matrix(0)
     for i in range(NUM_EPISODES):
@@ -230,7 +230,7 @@ def Q_learning():
 
 
 start_time = time.time()
-Q = Q_learning()
+Q = expected_sarsa()
 
 see_action_values(Q)
 print(
