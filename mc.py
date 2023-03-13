@@ -117,9 +117,9 @@ a = 0.1
 GAMMA = 0.9
 e = 0.1
 EPSILON = 0.1
-num_episodes = 5
+num_episodes = 200
 
-standard_input = '1\n0'
+standard_input = '1\n0\n'
 user_input = {}
 user_input_labels = ['p1', 'p2']
 # Get user input
@@ -164,8 +164,11 @@ def epsilon_greedy_policy(Q):
 def generate_episode(policy, env):
     episode = []
     state = random_start_state()
-    while True:
-        action = policy[state[1]][state[0]]
+    max_episode_depth = 100000
+    for _ in range(max_episode_depth):
+        cell_policy = policy[state].items()
+        action = random.choices([x[0] for x in cell_policy], [
+                                x[1] for x in cell_policy])[0]
         move = env.agent_makes_decision(action, state)
         reward = move['reward']
         episode.append([state, action, reward])
@@ -216,8 +219,8 @@ def update_policy(episode, Q, policy):
 
 
 def mc_control():
-    env = Environment()
-    Q = generate_matrix(0)
+    env = Environment(p1=user_input['p1'], p2=user_input['p2'])
+    Q = generate_matrix(-10)
     returns = generate_matrix([])
     policy = generate_matrix(0.25)
 
@@ -225,11 +228,13 @@ def mc_control():
         episode = generate_episode(policy, env)
         process_policy(episode, Q, returns)
         update_policy(episode, Q, policy)
-        # for i in range(len(episode)):
-        #     a = episode[-i]
-        #     G = g*G + a[1]
-        #     print(a)
+        print(f"done {i} with len {len(episode)}")
+    print_q = {}
+    for key, value in Q.items():
+        print_q[str(key)] = value
+    print(print_q)
 
 
-# mc_control()
-print(generate_matrix(0.25))
+print('start')
+mc_control()
+print('done')
