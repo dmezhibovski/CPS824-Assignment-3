@@ -1,5 +1,6 @@
 import random
 import time
+import csv
 
 
 class Environment():
@@ -175,6 +176,7 @@ def find_a_star(Q, state):
 def sarsa():
     env = Environment()
     Q = generate_matrix(0)
+    last_time = time.time()
     for i in range(NUM_EPISODES):
         starting_point = random_start_state()
         state = starting_point
@@ -205,3 +207,8 @@ Q = sarsa()
 see_action_values(Q)
 print(
     f"Esapsed time {time.time() - start_time} with times of \n{recorded_times}")
+
+
+with open('output.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerows(Q)
