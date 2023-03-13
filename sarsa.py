@@ -1,5 +1,6 @@
 import random
 import time
+import csv
 
 
 class Environment():
@@ -209,3 +210,8 @@ Q = sarsa()
 
 see_action_values(Q)
 print(f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
+
+
+with open('output.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerows(Q)
