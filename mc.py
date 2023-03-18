@@ -117,9 +117,8 @@ class Environment():
 
 a = 0.1
 GAMMA = 0.9
-e = 0.1
 EPSILON = 0.1
-num_episodes = 200
+num_episodes = 1000
 recorded_times = []
 
 standard_input = '1\n0\n'
@@ -129,6 +128,15 @@ user_input_labels = ['p1', 'p2']
 for label in user_input_labels:
     print(f'Enter a numer for {label}')
     user_input[label] = float(input())
+
+
+def see_action_values(Q):
+    for c in range(10):
+        for r in range(10):
+            best_action, best_action_value = choose_max_Q(Q[(r, 9 - c)])
+            print('%.2f' % (best_action_value)+' ', end='')
+            # print('%s' % (best_action)+' ',end='')
+        print('\n')
 
 
 def random_start_state():
@@ -167,8 +175,10 @@ def epsilon_greedy_policy(Q):
 def generate_episode(policy, env):
     episode = []
     state = random_start_state()
-    max_episode_depth = 100000
+    max_episode_depth = 2500
+    ep_length = 0
     for _ in range(max_episode_depth):
+        ep_length += 1
         cell_policy = policy[state].items()
         action = random.choices([x[0] for x in cell_policy], [
                                 x[1] for x in cell_policy])[0]
@@ -178,6 +188,7 @@ def generate_episode(policy, env):
         state = move['location']
         if reward == 100:
             break
+    # print(ep_length)
     return episode
 
 
@@ -188,8 +199,8 @@ def process_policy(episode, Q, returns):
     for state, action, reward in episode[::-1]:
         G = GAMMA*G + reward
         episode_return_values.append([state, action, G])
-    episode_return_values.reverse()
-    for state, action, return_value in episode_return_values:
+    # episode_return_values.reverse()
+    for state, action, return_value in episode_return_values[::-1]:
         if not state in previous_state_actions:
             previous_state_actions.add(state)
             returns[state][action].append(return_value)
@@ -223,45 +234,27 @@ def update_policy(episode, Q, policy):
 
 def mc_control():
     env = Environment(p1=user_input['p1'], p2=user_input['p2'])
-    Q = generate_matrix(-10)
+    Q = generate_matrix(0)
     returns = generate_matrix([])
     policy = generate_matrix(0.25)
     last_time = time.time()
     for i in range(num_episodes):
+        # print(f"Elapsed time {time.time() - start_time}")
         episode = generate_episode(policy, env)
         process_policy(episode, Q, returns)
         update_policy(episode, Q, policy)
-        print(f"done {i} with len {len(episode)}")
+        # print(f"done {i} with len {len(episode)}")
         time_delta = time.time() - last_time
         recorded_times.append((i, time_delta))
         last_time = time.time()
-    print_q = {}
-    for key, value in Q.items():
-        print_q[str(key)] = value
-    print(print_q)
+    print(policy)
     return Q
 
 
 start_time = time.time()
 print('start')
 Q = mc_control()
+see_action_values(Q)
 print('done')
 print(
     f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
-
-
-def Q_to_2D(Q):
-    grid_size = 10
-    grid = [[0]*grid_size for x in range(grid_size)]
-    for state, action_dict in Q.items():
-        row, col = state
-        grid[row][col] = str(max(action_dict.values()))
-    grid.reverse()
-    return grid
-
-
-with open('output.csv', 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerows(Q_to_2D(Q))
-
-print('done')

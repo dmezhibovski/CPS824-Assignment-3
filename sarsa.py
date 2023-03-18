@@ -118,7 +118,7 @@ class Environment():
 a = 0.1
 g = 0.9
 EPSILON = 0.1
-NUM_EPISODES = 50000
+NUM_EPISODES = 1000
 ALPHA = 0.1
 GAMMA = 0.9
 recorded_times = []
