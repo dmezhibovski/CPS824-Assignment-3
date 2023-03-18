@@ -117,7 +117,7 @@ class Environment():
 a = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-num_episodes = 1000
+num_episodes = 10000
 recorded_times = []
 
 standard_input = '1\n0\n'
@@ -176,9 +176,7 @@ def generate_episode(policy, env):
     episode = []
     state = random_start_state()
     max_episode_depth = 2500
-    ep_length = 0
     for _ in range(max_episode_depth):
-        ep_length+=1
         cell_policy = policy[state].items()
         action = random.choices([x[0] for x in cell_policy], [
                                 x[1] for x in cell_policy])[0]
@@ -192,7 +190,7 @@ def generate_episode(policy, env):
     return episode
 
 
-def process_policy(episode, Q, returns):
+def process_policy(episode, Q, return_sum, return_count):
     G = 0
     previous_state_actions = set()
     episode_return_values = []
@@ -200,12 +198,12 @@ def process_policy(episode, Q, returns):
         G = GAMMA*G + reward
         episode_return_values.append([state, action, G])
     # episode_return_values.reverse()
-    for state, action, return_value in episode_return_values[::-1]:
-        if not state in previous_state_actions:
+    for state, action ,reward in episode[::-1]:
+        if state!=(9,9) and  not state in previous_state_actions:
             previous_state_actions.add(state)
-            returns[state][action].append(return_value)
-            Q[state][action] = sum(returns[state][action]) / \
-                len(returns[state][action])
+            return_sum[state][action]+=G
+            return_count[state][action]+=1
+            Q[state][action] = return_sum[state][action] / return_count[state][action]
 
 
 def find_a_star(Q, state):
@@ -235,19 +233,17 @@ def update_policy(episode, Q, policy):
 def mc_control():
     env = Environment(p1=user_input['p1'], p2=user_input['p2'])
     Q = generate_matrix(0)
-    returns = generate_matrix([])
+    return_sum = generate_matrix(0)
+    return_count = generate_matrix(0)
     policy = generate_matrix(0.25)
     last_time = time.time()
     for i in range(num_episodes):
-        # print(f"Elapsed time {time.time() - start_time}")
         episode = generate_episode(policy, env)
-        process_policy(episode, Q, returns)
+        process_policy(episode, Q, return_sum,return_count)
         update_policy(episode, Q, policy)
-        # print(f"done {i} with len {len(episode)}")
         time_delta = time.time() - last_time
         recorded_times.append((i, time_delta))
         last_time = time.time()
-    print(policy)
     return Q 
 
 
