@@ -208,10 +208,23 @@ def sarsa():
 start_time = time.time()
 Q = sarsa()
 
-see_action_values(Q)
-print(f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
+# see_action_values(Q)
+print(
+    f"Elapsed time {time.time() - start_time} with times of \n{len(recorded_times)}")
+
+
+def Q_to_2D(Q):
+    grid_size = 10
+    grid = [[0]*grid_size for x in range(grid_size)]
+    for state, action_dict in Q.items():
+        row, col = state
+        grid[row][col] = str(max(action_dict.values()))
+    grid.reverse()
+    return grid
 
 
 with open('output.csv', 'w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerows(Q)
+    writer.writerows(Q_to_2D(Q))
+
+print('done')

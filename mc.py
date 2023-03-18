@@ -1,5 +1,6 @@
 import random
 import time
+import csv
 
 
 class Environment():
@@ -129,11 +130,10 @@ for label in user_input_labels:
     user_input[label] = float(input())
 
 
-
 def see_action_values(Q):
     for c in range(10):
         for r in range(10):
-            best_action, best_action_value = choose_max_Q(Q[(r,9- c)])
+            best_action, best_action_value = choose_max_Q(Q[(r, 9 - c)])
             print('%.2f' % (best_action_value)+' ', end='')
             # print('%s' % (best_action)+' ',end='')
         print('\n')
@@ -252,4 +252,5 @@ print('start')
 Q = mc_control()
 see_action_values(Q)
 print('done')
-print(f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
+print(
+    f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
