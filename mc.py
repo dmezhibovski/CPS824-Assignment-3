@@ -132,11 +132,20 @@ for label in user_input_labels:
 
 def see_action_values(Q):
     for c in range(10):
+        line =[]
+        if c == 5:
+            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            format = len(line)*'{:8s}'
+            print(format.format(*line))
+        line = []
         for r in range(10):
+            if r== 5:
+                line.append(' ') if c==2 or c==7 else line.append('|')
             best_action, best_action_value = choose_max_Q(Q[(r, 9 - c)])
-            print('%.2f' % (best_action_value)+' ', end='')
+            line.append(str(round(best_action_value,2))+' ')
             # print('%s' % (best_action)+' ',end='')
-        print('\n')
+        format = len(line)*'{:8s}'
+        print(format.format(*line))
 
 
 def random_start_state():
@@ -175,7 +184,7 @@ def epsilon_greedy_policy(Q):
 def generate_episode(policy, env):
     episode = []
     state = random_start_state()
-    max_episode_depth = 2500
+    max_episode_depth = 1000
     for _ in range(max_episode_depth):
         cell_policy = policy[state].items()
         action = random.choices([x[0] for x in cell_policy], [

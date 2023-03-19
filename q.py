@@ -118,7 +118,8 @@ ALPHA = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
 
-num_episodes = 500
+num_episodes = 5000
+
 recorded_times = []
 
 standard_input = '1\n0'
@@ -159,14 +160,23 @@ def choose_max_Q(Qs):
 
     return maxA, maxQ
 
-
 def see_action_values(Q):
     for c in range(10):
+        line =[]
+        if c == 5:
+            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            format = len(line)*'{:8s}'
+            print(format.format(*line))
+        line = []
         for r in range(10):
-            best_action, best_action_value = choose_max_Q(Q[(r, 9-c)])
-            print('%.2f' % (best_action_value)+' ', end='')
+            if r== 5:
+                line.append(' ') if c==2 or c==7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(r, 9 - c)])
+            line.append(str(round(best_action_value,2))+' ')
             # print('%s' % (best_action)+' ',end='')
-        print('\n')
+        format = len(line)*'{:8s}'
+        print(format.format(*line))
+
 
 
 def Q_learning():
@@ -199,7 +209,6 @@ def Q_learning():
 
 start_time = time.time()
 Q = Q_learning()
-
 see_action_values(Q)
 print('\n')
 print(f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")

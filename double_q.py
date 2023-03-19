@@ -162,11 +162,21 @@ def choose_max_Q(Qs):
 
 def see_action_values(Q):
     for c in range(10):
+        line =[]
+        if c == 5:
+            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            format = len(line)*'{:8s}'
+            print(format.format(*line))
+        line = []
         for r in range(10):
-            best_action, best_action_value = choose_max_Q(Q[(r,9- c)])
-            print('%.2f' % (best_action_value)+' ', end='')
+            if r== 5:
+                line.append(' ') if c==2 or c==7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(r, 9 - c)])
+            line.append(str(round(best_action_value,2))+' ')
             # print('%s' % (best_action)+' ',end='')
-        print('\n')
+        format = len(line)*'{:8s}'
+        print(format.format(*line))
+
 
 def choose_max_Q_double(Qs1, Qs2):
     maxA = ''
