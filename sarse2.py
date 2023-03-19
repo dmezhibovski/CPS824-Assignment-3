@@ -115,8 +115,11 @@ class Environment():
 # ////////////////////////////////
 
 
+# ////////// GLOBAL VARIABLES ////////
+MAX_EPSILON = 0.1
+ENABLE_DECREASING_E = False
 EPSILON = 0.1
-NUM_EPISODES = 1000
+NUM_EPISODES = 100000
 ALPHA = 0.1
 GAMMA = 0.9
 
@@ -129,6 +132,10 @@ for label in user_input_labels:
     user_input[label] = float(input())
 start_time = time.time()
 
+
+# ////////////////////////////////
+#        START SARSA LOGIC
+# ////////////////////////////////
 
 def generate_matrix(initialized_value):
     new_matrix = {}
@@ -187,6 +194,7 @@ def epsilon_greedy_Q(Q_state):
 
 
 def sarsa():
+    total_time_steps = 0
     env = Environment(p1=user_input['p1'], p2=user_input['p2'])
     Q = generate_matrix(0)
     for i in range(NUM_EPISODES):
@@ -204,7 +212,19 @@ def sarsa():
                  [next_action]-Q[state][best_action])
             Q[state][best_action] = Q[state][best_action] + learning_step_value
             state = next_state
-    return Q
+            total_time_steps += 1
+            if ENABLE_DECREASING_E:
+                global EPSILON
+                EPSILON = MAX_EPSILON*(1 - (i/NUM_EPISODES))
+    return Q, total_time_steps
+
+# ////////////////////////////////
+#        END SARSA LOGIC
+# ////////////////////////////////
+
+# ////////////////////////////////
+#        START REPORTING CODE
+# ////////////////////////////////
 
 
 def Q_to_2D(Q):
@@ -219,18 +239,35 @@ def Q_to_2D(Q):
 
 def save_data(Q, misc_arr, folder, name):
     Q_data = Q_to_2D(Q)
-    with open(f'{folder}/{name}.csv', 'w+') as csv_file:
+    with open(f'{folder}/{name}.csv', 'w+', newline='') as csv_file:
         writer = csv.writer(csv_file)
         for csv_row in Q_data:
             writer.writerow(csv_row)
     with open(f'{folder}/{name}.txt', 'w') as txt_file:
         txt_file.writelines(misc_arr)
+# ////////////////////////////////
+#      END REPORTING CODE
+# ////////////////////////////////
 
 
-for new_alpha in [0.05, 0.1, 0.2]:
-    ALPHA = new_alpha
-    Q = sarsa()
-    save_data(Q, [f'Time passes {time.time() - start_time}'],
-              folder='data', name=f'a={new_alpha}sarsa')
+# ------ ENTRY POINT ------------
+for decreasing_e in [False, True]:
+    if decreasing_e:
+        ENABLE_DECREASING_E = True
+        MAX_EPSILON = 0.1
+    else:
+        ENABLE_DECREASING_E = False
+        EPSILON = 0.1
+    for new_alpha in [0.05, 0.1, 0.2]:
+        ALPHA = new_alpha
+        Q, steps = sarsa()
+        text = [f'Time passes {time.time() - start_time}\n',
+                f'Total number of steps is {steps}\n',
+                f'episode num: {NUM_EPISODES}\n',
+                f'p1 {user_input["p1"]}\n',
+                f'p2 {user_input["p2"]}\n',
+                f'Is using decrasing e {decreasing_e}']
+        save_data(Q, text, folder='data',
+                  name=f'a={new_alpha}{decreasing_e}sarsa')
 
 print('done')
