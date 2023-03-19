@@ -117,8 +117,7 @@ class Environment():
 ALPHA = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-
-num_episodes = 500
+NUM_EPISODES = 5000
 recorded_times_double = []
 
 standard_input = '1\n0'
@@ -198,7 +197,7 @@ def double_Q_learning():
     Q1 = generate_matrix(0)
     Q2 = generate_matrix(0)
     last_time = time.time()
-    for i in range(num_episodes):
+    for i in range(NUM_EPISODES):
         starting_point = random_start_state()
         state = starting_point
         steps = 0
@@ -242,6 +241,6 @@ start_time = time.time()
 Q1, Q2 = double_Q_learning()
 
 see_action_values(Q1)
-print('\n')
+print('----------------------------------------------------------------------------------------\n')
 see_action_values(Q2)
-print(f"lsapsed time {time.time() - start_time} with times of \n{recorded_times_double}")
+print(f"Elsapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times_double}")

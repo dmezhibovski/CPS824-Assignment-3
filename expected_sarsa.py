@@ -253,7 +253,7 @@ start_time = time.time()
 Q = expected_sarsa()
 
 see_action_values(Q)
-print(f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
+print(f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times}")
 
 with open('output.csv', 'w', newline='') as file:
     writer = csv.writer(file)

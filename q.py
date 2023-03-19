@@ -117,9 +117,7 @@ class Environment():
 ALPHA = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-
-num_episodes = 5000
-
+NUM_EPISODES = 50000
 recorded_times = []
 
 standard_input = '1\n0'
@@ -183,7 +181,7 @@ def Q_learning():
     env = Environment()
     Q = generate_matrix(0)
     last_time = time.time()
-    for i in range(num_episodes):
+    for i in range(NUM_EPISODES):
         starting_point = random_start_state()
         state = starting_point
         steps = 0
@@ -211,4 +209,4 @@ start_time = time.time()
 Q = Q_learning()
 see_action_values(Q)
 print('\n')
-print(f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
+print(f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times}")

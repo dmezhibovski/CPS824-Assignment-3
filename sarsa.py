@@ -220,7 +220,7 @@ Q = sarsa()
 
 # see_action_values(Q)
 print(
-    f"Elapsed time {time.time() - start_time} with times of \n{len(recorded_times)}")
+    f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{len(recorded_times)}")
 
 
 def Q_to_2D(Q):

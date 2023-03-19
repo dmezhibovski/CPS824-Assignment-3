@@ -118,7 +118,7 @@ class Environment():
 a = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-num_episodes = 10000
+NUM_EPISODES = 10000
 recorded_times = []
 
 standard_input = '1\n0\n'
@@ -246,7 +246,7 @@ def mc_control():
     return_count = generate_matrix(0)
     policy = generate_matrix(0.25)
     last_time = time.time()
-    for i in range(num_episodes):
+    for i in range(NUM_EPISODES):
         episode = generate_episode(policy, env)
         process_policy(episode, Q, return_sum,return_count)
         update_policy(episode, Q, policy)
@@ -262,4 +262,4 @@ Q = mc_control()
 see_action_values(Q)
 print('done')
 print(
-    f"Elapsed time {time.time() - start_time} with times of \n{recorded_times}")
+    f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times}")
