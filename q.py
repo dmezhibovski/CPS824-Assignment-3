@@ -23,9 +23,9 @@ class Environment():
         self.walls = [['']*grid_size for _ in range(grid_size)]
         for x in range(grid_size):
             self.walls[0][x] += 'd'  # bottom of the world
-            self.walls[grid_size-1][x] += 'u'  # top fo the world
+            self.walls[grid_size-1][x] += 'u'  # top of the world
             self.walls[x][0] += 'l'  # left side of world
-            self.walls[x][grid_size-1] += 'r'  # right sid eof world
+            self.walls[x][grid_size-1] += 'r'  # right side of world
 
             # Vertical middle wall
             self.walls[4][x] += 'u'
@@ -125,7 +125,7 @@ user_input = {}
 user_input_labels = ['p1', 'p2']
 # Get user input
 for label in user_input_labels:
-    print(f'Enter a numer for {label}')
+    print(f'Enter a number for {label}')
     user_input[label] = float(input())
 
 
@@ -183,7 +183,6 @@ def Q_learning():
     last_time = time.time()
     for i in range(NUM_EPISODES):
         state = random_start_state()
-        steps = 0
         while True:
             if state == (9, 9):
                 break
@@ -196,8 +195,6 @@ def Q_learning():
                 (move['reward']+GAMMA*max_next_state_action_value-best_action_value)
             Q[state][best_action] = Q[state][best_action] + learning_step_value
             state = state_prime
-            steps += 1
-        # print(steps)
         time_delta = time.time() - last_time
         recorded_times.append((i, time_delta))
         last_time = time.time()
