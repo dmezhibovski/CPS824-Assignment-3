@@ -118,7 +118,7 @@ class Environment():
 a = 0.1
 g = 0.9
 EPSILON = 0.1
-NUM_EPISODES = 1000
+NUM_EPISODES = 10000
 ALPHA = 0.1
 GAMMA = 0.9
 recorded_times = []
@@ -147,11 +147,11 @@ def random_start_state():
     return (random.randint(0, 9), random.randint(0, 9))
 
 
-def choose_max_Q(Qs):
+def choose_max_Q(Qs,e=EPSILON):
     maxA = ''
     maxQ = -1000
     actions = ['up', 'down', 'left', 'right']
-    if random.random() < EPSILON:
+    if random.random() < e:
         maxA = actions[random.randint(0, 3)]
         return maxA, Qs[maxA]
     for a in actions:
@@ -163,19 +163,19 @@ def choose_max_Q(Qs):
 
 
 def see_action_values(Q):
-    for c in range(10):
+    for r in range(10):
         line =[]
-        if c == 5:
+        if r == 5:
             line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
-        for r in range(10):
-            if r== 5:
-                line.append(' ') if c==2 or c==7 else line.append('|')
-            best_action, best_action_value = choose_max_Q(Q[(r, 9 - c)])
-            line.append(str(round(best_action_value,2))+' ')
-            # print('%s' % (best_action)+' ',end='')
+        for c in range(10):
+            if c== 5:
+                line.append(' ') if r==2 or r==7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)],0)
+            # line.append(str(round(best_action_value,2))+' ')
+            line.append(best_action)
         format = len(line)*'{:8s}'
         print(format.format(*line))
 
@@ -196,14 +196,14 @@ def sarsa():
         starting_point = random_start_state()
         state = starting_point
         while True:
-            best_action = max(Q[state].items(), key=lambda item: item[1])[
-                0]  # make e-greedy
+            best_action, best_action_value = choose_max_Q(Q[state])
             move = env.agent_makes_decision(best_action, state)
             if state == (9, 9):
                 break
+            # if state == (9,0):
+            #     print(best_action)
             state_prime = move['location']
-            max_next_action = max(Q[state_prime].items(),
-                                  key=lambda item: item[1])[0]
+            max_next_action,max_next_action_value = choose_max_Q(Q[state_prime])
             learning_step_value = ALPHA * \
                 (move['reward']+GAMMA*Q[state_prime]
                  [max_next_action]-Q[state][best_action])
@@ -217,7 +217,8 @@ def sarsa():
 
 start_time = time.time()
 Q = sarsa()
-
+see_action_values(Q)
+print(Q)
 # see_action_values(Q)
 print(
     f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{len(recorded_times)}")

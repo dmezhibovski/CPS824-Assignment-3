@@ -131,19 +131,19 @@ for label in user_input_labels:
 
 
 def see_action_values(Q):
-    for c in range(10):
+    for r in range(10):
         line =[]
-        if c == 5:
+        if r == 5:
             line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
-        for r in range(10):
-            if r== 5:
-                line.append(' ') if c==2 or c==7 else line.append('|')
-            best_action, best_action_value = choose_max_Q(Q[(r, 9 - c)])
-            line.append(str(round(best_action_value,2))+' ')
-            # print('%s' % (best_action)+' ',end='')
+        for c in range(10):
+            if c== 5:
+                line.append(' ') if r==2 or r==7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)],0)
+            # line.append(str(round(best_action_value,2))+' ')
+            line.append(best_action)
         format = len(line)*'{:8s}'
         print(format.format(*line))
 
