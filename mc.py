@@ -24,9 +24,9 @@ class Environment():
         self.walls = [['']*grid_size for _ in range(grid_size)]
         for x in range(grid_size):
             self.walls[0][x] += 'd'  # bottom of the world
-            self.walls[grid_size-1][x] += 'u'  # top fo the world
+            self.walls[grid_size-1][x] += 'u'  # top of the world
             self.walls[x][0] += 'l'  # left side of world
-            self.walls[x][grid_size-1] += 'r'  # right sid eof world
+            self.walls[x][grid_size-1] += 'r'  # right side of world
 
             # Vertical middle wall
             self.walls[4][x] += 'u'
@@ -118,7 +118,7 @@ class Environment():
 a = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-NUM_EPISODES = 10000
+NUM_EPISODES = 50000
 recorded_times = []
 
 standard_input = '1\n0\n'
@@ -126,24 +126,24 @@ user_input = {}
 user_input_labels = ['p1', 'p2']
 # Get user input
 for label in user_input_labels:
-    print(f'Enter a numer for {label}')
+    print(f'Enter a number for {label}')
     user_input[label] = float(input())
 
 
 def see_action_values(Q):
-    for c in range(10):
+    for r in range(10):
         line =[]
-        if c == 5:
+        if r == 5:
             line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
-        for r in range(10):
-            if r== 5:
-                line.append(' ') if c==2 or c==7 else line.append('|')
-            best_action, best_action_value = choose_max_Q(Q[(r, 9 - c)])
-            line.append(str(round(best_action_value,2))+' ')
-            # print('%s' % (best_action)+' ',end='')
+        for c in range(10):
+            if c== 5:
+                line.append(' ') if r==2 or r==7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)])
+            # line.append(str(round(best_action_value,2))+' ')
+            line.append(best_action)
         format = len(line)*'{:8s}'
         print(format.format(*line))
 
@@ -184,7 +184,7 @@ def epsilon_greedy_policy(Q):
 def generate_episode(policy, env):
     episode = []
     state = random_start_state()
-    max_episode_depth = 1000
+    max_episode_depth = 2000
     for _ in range(max_episode_depth):
         cell_policy = policy[state].items()
         action = random.choices([x[0] for x in cell_policy], [
@@ -241,7 +241,7 @@ def update_policy(episode, Q, policy):
 
 def mc_control():
     env = Environment(p1=user_input['p1'], p2=user_input['p2'])
-    Q = generate_matrix(0)
+    Q = generate_matrix(-10)
     return_sum = generate_matrix(0)
     return_count = generate_matrix(0)
     policy = generate_matrix(0.25)

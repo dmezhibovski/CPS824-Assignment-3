@@ -23,9 +23,9 @@ class Environment():
         self.walls = [['']*grid_size for _ in range(grid_size)]
         for x in range(grid_size):
             self.walls[0][x] += 'd'  # bottom of the world
-            self.walls[grid_size-1][x] += 'u'  # top fo the world
+            self.walls[grid_size-1][x] += 'u'  # top of the world
             self.walls[x][0] += 'l'  # left side of world
-            self.walls[x][grid_size-1] += 'r'  # right sid eof world
+            self.walls[x][grid_size-1] += 'r'  # right side of world
 
             # Vertical middle wall
             self.walls[4][x] += 'u'
@@ -117,7 +117,7 @@ class Environment():
 ALPHA = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-NUM_EPISODES = 50000
+NUM_EPISODES = 10000
 recorded_times = []
 
 standard_input = '1\n0'
@@ -125,7 +125,7 @@ user_input = {}
 user_input_labels = ['p1', 'p2']
 # Get user input
 for label in user_input_labels:
-    print(f'Enter a numer for {label}')
+    print(f'Enter a number for {label}')
     user_input[label] = float(input())
 
 
@@ -144,11 +144,11 @@ def random_start_state():
     return (random.randint(0, 9), random.randint(0, 9))
 
 
-def choose_max_Q(Qs):
+def choose_max_Q(Qs,e=EPSILON):
     maxA = ''
     maxQ = -1000
     actions = ['up', 'down', 'left', 'right']
-    if random.random() < EPSILON:
+    if random.random() < e:
         maxA = actions[random.randint(0, 3)]
         return maxA, Qs[maxA]
     for a in actions:
@@ -159,19 +159,19 @@ def choose_max_Q(Qs):
     return maxA, maxQ
 
 def see_action_values(Q):
-    for c in range(10):
+    for r in range(10):
         line =[]
-        if c == 5:
+        if r == 5:
             line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
-        for r in range(10):
-            if r== 5:
-                line.append(' ') if c==2 or c==7 else line.append('|')
-            best_action, best_action_value = choose_max_Q(Q[(r, 9 - c)])
-            line.append(str(round(best_action_value,2))+' ')
-            # print('%s' % (best_action)+' ',end='')
+        for c in range(10):
+            if c== 5:
+                line.append(' ') if r==2 or r==7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)],0)
+            # line.append(str(round(best_action_value,2))+' ')
+            line.append(best_action)
         format = len(line)*'{:8s}'
         print(format.format(*line))
 
@@ -182,9 +182,7 @@ def Q_learning():
     Q = generate_matrix(0)
     last_time = time.time()
     for i in range(NUM_EPISODES):
-        starting_point = random_start_state()
-        state = starting_point
-        steps = 0
+        state = random_start_state()
         while True:
             if state == (9, 9):
                 break
@@ -196,9 +194,7 @@ def Q_learning():
             learning_step_value = ALPHA * \
                 (move['reward']+GAMMA*max_next_state_action_value-best_action_value)
             Q[state][best_action] = Q[state][best_action] + learning_step_value
-            state = move['location']
-            steps += 1
-        # print(steps)
+            state = state_prime
         time_delta = time.time() - last_time
         recorded_times.append((i, time_delta))
         last_time = time.time()
