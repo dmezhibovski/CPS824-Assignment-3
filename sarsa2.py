@@ -197,10 +197,9 @@ def sarsa():
     env = Environment(p1=user_input['p1'], p2=user_input['p2'])
     Q = generate_matrix(0)
     for i in range(NUM_EPISODES):
-        starting_point = random_start_state()
-        state = starting_point
+        state = random_start_state()
+        best_action = epsilon_greedy_Q(Q[state])
         while True:
-            best_action = epsilon_greedy_Q(Q[state])
             move = env.agent_makes_decision(best_action, state)
             if state == (9, 9):
                 break
@@ -211,6 +210,7 @@ def sarsa():
                  [next_action]-Q[state][best_action])
             Q[state][best_action] = Q[state][best_action] + learning_step_value
             state = next_state
+            best_action = next_action
             total_time_steps += 1
             if ENABLE_DECREASING_E:
                 global EPSILON
