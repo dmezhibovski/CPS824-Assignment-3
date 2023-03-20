@@ -152,7 +152,7 @@ def random_start_state():
     return (random.randint(0, 9), random.randint(0, 9))
 
 
-def choose_max_Q(Qs,e=EPSILON):
+def choose_max_Q(Qs, e=EPSILON):
     maxA = ''
     maxQ = -1000
     actions = ['up', 'down', 'left', 'right']
@@ -169,16 +169,17 @@ def choose_max_Q(Qs,e=EPSILON):
 
 def see_action_values(Q):
     for r in range(10):
-        line =[]
+        line = []
         if r == 5:
-            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            line = ['--------', '--------', '        ', '--------', '--------',
+                    '+-------', '--------', '--------', '        ', '--------', '--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
         for c in range(10):
-            if c== 5:
-                line.append(' ') if r==2 or r==7 else line.append('|')
-            best_action, best_action_value = choose_max_Q(Q[(9-r, c)],0)
+            if c == 5:
+                line.append(' ') if r == 2 or r == 7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)], 0)
             # line.append(str(round(best_action_value,2))+' ')
             line.append(best_action)
         format = len(line)*'{:8s}'

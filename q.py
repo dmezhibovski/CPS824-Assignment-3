@@ -1,5 +1,6 @@
 import random
 import time
+import csv
 
 
 class Environment():
@@ -114,11 +115,11 @@ class Environment():
 # ////////////////////////////////
 
 
+# ------ GLOBAL VARIABLES ---------
 ALPHA = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-NUM_EPISODES = 10000
-recorded_times = []
+NUM_EPISODES = 100000
 
 standard_input = '1\n0'
 user_input = {}
@@ -127,6 +128,10 @@ user_input_labels = ['p1', 'p2']
 for label in user_input_labels:
     print(f'Enter a number for {label}')
     user_input[label] = float(input())
+
+# ////////////////////////////////
+#    START Q LEARNING LOGIC
+# ////////////////////////////////
 
 
 def generate_matrix(initialized_value):
@@ -144,7 +149,7 @@ def random_start_state():
     return (random.randint(0, 9), random.randint(0, 9))
 
 
-def choose_max_Q(Qs,e=EPSILON):
+def choose_max_Q(Qs, e=EPSILON):
     maxA = ''
     maxQ = -1000
     actions = ['up', 'down', 'left', 'right']
@@ -158,29 +163,30 @@ def choose_max_Q(Qs,e=EPSILON):
 
     return maxA, maxQ
 
+
 def see_action_values(Q):
     for r in range(10):
-        line =[]
+        line = []
         if r == 5:
-            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            line = ['--------', '--------', '        ', '--------', '--------',
+                    '+-------', '--------', '--------', '        ', '--------', '--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
         for c in range(10):
-            if c== 5:
-                line.append(' ') if r==2 or r==7 else line.append('|')
-            best_action, best_action_value = choose_max_Q(Q[(9-r, c)],0)
+            if c == 5:
+                line.append(' ') if r == 2 or r == 7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)], 0)
             # line.append(str(round(best_action_value,2))+' ')
             line.append(best_action)
         format = len(line)*'{:8s}'
         print(format.format(*line))
 
 
-
 def Q_learning():
     env = Environment()
     Q = generate_matrix(0)
-    last_time = time.time()
+    total_steps = 0
     for i in range(NUM_EPISODES):
         state = random_start_state()
         while True:
@@ -195,14 +201,68 @@ def Q_learning():
                 (move['reward']+GAMMA*max_next_state_action_value-best_action_value)
             Q[state][best_action] = Q[state][best_action] + learning_step_value
             state = state_prime
-        time_delta = time.time() - last_time
-        recorded_times.append((i, time_delta))
-        last_time = time.time()
-    return Q
+            total_steps += 1
+    return Q, total_steps
+# ////////////////////////////////
+#    END Q LEARNING LOGIC
+# ////////////////////////////////
+
+# ////////////////////////////////
+#        START REPORTING CODE
+# ////////////////////////////////
 
 
-start_time = time.time()
-Q = Q_learning()
-see_action_values(Q)
-print('\n')
-print(f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times}")
+def Q_to_2D(Q):
+    grid_size = 10
+    grid = [[0]*grid_size for x in range(grid_size)]
+    grid_name = [['']*grid_size for x in range(grid_size)]
+    for state, action_dict in Q.items():
+        row, col = state
+        grid[row][col] = str(max(action_dict.values()))
+        grid_name[row][col] = str(max(
+            action_dict.items(), key=lambda item: item[1])[0])
+    grid.reverse()
+    grid_name.reverse()
+    return grid, grid_name
+
+
+def save_data(Q, misc_arr, folder, name):
+    Q_data, policy = Q_to_2D(Q)
+    with open(f'{folder}/{name}Q.csv', 'w+', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        for csv_row in Q_data:
+            writer.writerow(csv_row)
+    with open(f'{folder}/{name}Pol.csv', 'w+', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        for csv_row in policy:
+            writer.writerow(csv_row)
+    with open(f'{folder}/{name}.txt', 'w') as txt_file:
+        txt_file.writelines(misc_arr)
+# ////////////////////////////////
+#      END REPORTING CODE
+# ////////////////////////////////
+
+
+# ------ ENTRY POINT ------------
+for decreasing_e in [False, True]:
+    if decreasing_e:
+        ENABLE_DECREASING_E = True
+        MAX_EPSILON = 0.1
+    else:
+        ENABLE_DECREASING_E = False
+        EPSILON = 0.1
+    for new_alpha in [0.05, 0.1, 0.2]:
+        ALPHA = new_alpha
+        run_start = time.time()
+        Q, steps = Q_learning()
+        text = [f'Time passes {time.time() - run_start}\n',
+                f'Total number of steps is {steps}\n',
+                f'episode num: {NUM_EPISODES}\n',
+                f'p1 {user_input["p1"]}\n',
+                f'p2 {user_input["p2"]}\n',
+                f'Is using decrasing e {decreasing_e}\n',
+                f'Q: {Q}']
+        save_data(Q, text, folder='data',
+                  name=f'a={new_alpha}{decreasing_e}qLearn')
+
+print('done')
