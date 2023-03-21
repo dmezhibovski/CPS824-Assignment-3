@@ -1,5 +1,6 @@
 import random
 import time
+import csv
 
 
 class Environment():
@@ -114,11 +115,11 @@ class Environment():
 # ////////////////////////////////
 
 
+# ------ GLOBAL VARIABLES ---------
 ALPHA = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-NUM_EPISODES = 5000
-recorded_times_double = []
+NUM_EPISODES = 100000
 
 standard_input = '1\n0'
 user_input = {}
@@ -127,6 +128,10 @@ user_input_labels = ['p1', 'p2']
 for label in user_input_labels:
     print(f'Enter a number for {label}')
     user_input[label] = float(input())
+
+# ////////////////////////////////
+#  START DOUBLE Q LEARNING LOGIC
+# ////////////////////////////////
 
 
 def generate_matrix(initialized_value):
@@ -160,9 +165,10 @@ def choose_max_Q(Qs):
 
 def see_action_values(Q):
     for r in range(10):
-        line =[]
+        line = []
         if r == 5:
-            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            line = ['--------', '--------', '        ', '--------', '--------',
+                    '+-------', '--------', '--------', '        ', '--------', '--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
@@ -209,7 +215,7 @@ def double_Q_learning():
     env = Environment()
     Q1 = generate_matrix(0)
     Q2 = generate_matrix(0)
-    last_time = time.time()
+    total_steps = 0
     for i in range(NUM_EPISODES):
         starting_point = random_start_state()
         state = starting_point
@@ -242,16 +248,18 @@ def double_Q_learning():
                     learning_step_value
                 state = move['location']
             steps += 1
-        time_delta = time.time() - last_time
-        recorded_times_double.append((i, time_delta))
-        last_time = time.time()
+            total_steps += 1
 
         # print(steps)
-    return Q1, Q2
+    return Q1, Q2, total_steps
+# ////////////////////////////////
+#  START DOUBLE Q LEARNING LOGIC
+# ////////////////////////////////
 
 
 start_time = time.time()
-Q1, Q2 = double_Q_learning()
+print('start')
+Q1, Q2 ,steps= double_Q_learning()
 
 see_action_values(Q1)
 print('----------------------------------------------------------------------------------------\n')
@@ -261,4 +269,4 @@ see_policy(Q1)
 print('----------------------------------------------------------------------------------------\n')
 see_policy(Q2)
 print('\n')
-print(f"Elsapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times_double}")
+print(f"Elsapsed time {time.time() - start_time} with {steps} steps")

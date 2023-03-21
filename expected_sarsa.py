@@ -132,7 +132,7 @@ user_input_labels = ['p1', 'p2']
 for label in user_input_labels:
     print(f'Enter a number for {label}')
     user_input[label] = float(input())
-start_time = time.time()
+
 # ////////////////////////////////
 #    START EXPECTED SARSA LOGIC
 # ////////////////////////////////
@@ -170,9 +170,10 @@ def choose_max_Q(Qs):
 
 def see_action_values(Q):
     for r in range(10):
-        line =[]
+        line = []
         if r == 5:
-            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            line = ['--------', '--------', '        ', '--------', '--------',
+                    '+-------', '--------', '--------', '        ', '--------', '--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
@@ -278,62 +279,11 @@ def expected_sarsa():
 # ////////////////////////////////
 
 
-# ////////////////////////////////
-#        START REPORTING CODE
-# ////////////////////////////////
-
-
-def Q_to_2D(Q):
-    grid_size = 10
-    grid = [[0]*grid_size for x in range(grid_size)]
-    grid_name = [['']*grid_size for x in range(grid_size)]
-    for state, action_dict in Q.items():
-        row, col = state
-        grid[row][col] = str(max(action_dict.values()))
-        grid_name[row][col] = str(max(
-            action_dict.items(), key=lambda item: item[1])[0])
-    grid.reverse()
-    grid_name.reverse()
-    return grid, grid_name
-
-
-def save_data(Q, misc_arr, folder, name):
-    Q_data, policy = Q_to_2D(Q)
-    with open(f'{folder}/{name}Q.csv', 'w+', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        for csv_row in Q_data:
-            writer.writerow(csv_row)
-    with open(f'{folder}/{name}Pol.csv', 'w+', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        for csv_row in policy:
-            writer.writerow(csv_row)
-    with open(f'{folder}/{name}.txt', 'w') as txt_file:
-        txt_file.writelines(misc_arr)
-# ////////////////////////////////
-#      END REPORTING CODE
-# ////////////////////////////////
-
-
-# ------ ENTRY POINT ------------
-for decreasing_e in [False, True]:
-    if decreasing_e:
-        ENABLE_DECREASING_E = True
-        MAX_EPSILON = 0.1
-    else:
-        ENABLE_DECREASING_E = False
-        EPSILON = 0.1
-    for new_alpha in [0.05, 0.1, 0.2]:
-        ALPHA = new_alpha
-        run_start = time.time()
-        Q, steps = expected_sarsa()
-        text = [f'Time passes {time.time() - run_start}\n',
-                f'Total number of steps is {steps}\n',
-                f'episode num: {NUM_EPISODES}\n',
-                f'p1 {user_input["p1"]}\n',
-                f'p2 {user_input["p2"]}\n',
-                f'Is using decrasing e {decreasing_e}\n',
-                f'Q: {Q}']
-        save_data(Q, text, folder='data',
-                  name=f'a={new_alpha}{decreasing_e}EXPsarsa')
-
-print('done')
+start_time = time.time()
+print('start')
+Q, steps = expected_sarsa()
+see_action_values(Q)
+print('\n')
+see_policy(Q)
+print('\n')
+print(f'done. Finished in {time.time() - start_time} with {steps} steps')

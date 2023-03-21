@@ -1,5 +1,6 @@
 import random
 import time
+import csv
 
 
 class Environment():
@@ -114,11 +115,11 @@ class Environment():
 # ////////////////////////////////
 
 
+# ------ GLOBAL VARIABLES ---------
 ALPHA = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
 NUM_EPISODES = 100000
-recorded_times = []
 
 standard_input = '1\n0'
 user_input = {}
@@ -127,6 +128,10 @@ user_input_labels = ['p1', 'p2']
 for label in user_input_labels:
     print(f'Enter a number for {label}')
     user_input[label] = float(input())
+
+# ////////////////////////////////
+#    START Q LEARNING LOGIC
+# ////////////////////////////////
 
 
 def generate_matrix(initialized_value):
@@ -144,7 +149,7 @@ def random_start_state():
     return (random.randint(0, 9), random.randint(0, 9))
 
 
-def choose_max_Q(Qs,e=EPSILON):
+def choose_max_Q(Qs, e=EPSILON):
     maxA = ''
     maxQ = -1000
     actions = ['up', 'down', 'left', 'right']
@@ -158,11 +163,13 @@ def choose_max_Q(Qs,e=EPSILON):
 
     return maxA, maxQ
 
+
 def see_action_values(Q):
     for r in range(10):
-        line =[]
+        line = []
         if r == 5:
-            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            line = ['--------', '--------', '        ', '--------', '--------',
+                    '+-------', '--------', '--------', '        ', '--------', '--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
@@ -191,11 +198,10 @@ def see_policy(Q):
         print(format.format(*line))
 
 
-
 def Q_learning():
     env = Environment()
     Q = generate_matrix(0)
-    last_time = time.time()
+    total_steps = 0
     for i in range(NUM_EPISODES):
         state = random_start_state()
         while True:
@@ -210,16 +216,18 @@ def Q_learning():
                 (move['reward']+GAMMA*max_next_state_action_value-best_action_value)
             Q[state][best_action] = Q[state][best_action] + learning_step_value
             state = state_prime
-        time_delta = time.time() - last_time
-        recorded_times.append((i, time_delta))
-        last_time = time.time()
-    return Q
+            total_steps += 1
+    return Q, total_steps
+# ////////////////////////////////
+#    END Q LEARNING LOGIC
+# ////////////////////////////////
 
 
 start_time = time.time()
-Q = Q_learning()
+print('start')
+Q ,steps= Q_learning()
 see_action_values(Q)
 print('\n')
 see_policy(Q)
 print('\n')
-print(f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times}")
+print(f"Elapsed time {time.time() - start_time} with {steps} steps ")
