@@ -117,7 +117,7 @@ class Environment():
 ALPHA = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-NUM_EPISODES = 10000
+NUM_EPISODES = 100000
 recorded_times = []
 
 standard_input = '1\n0'
@@ -169,8 +169,23 @@ def see_action_values(Q):
         for c in range(10):
             if c== 5:
                 line.append(' ') if r==2 or r==7 else line.append('|')
-            best_action, best_action_value = choose_max_Q(Q[(9-r, c)],0)
-            # line.append(str(round(best_action_value,2))+' ')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)])
+            line.append(str(round(best_action_value,2))+' ')
+        format = len(line)*'{:8s}'
+        print(format.format(*line))
+
+def see_policy(Q):
+    for r in range(10):
+        line =[]
+        if r == 5:
+            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            format = len(line)*'{:8s}'
+            print(format.format(*line))
+        line = []
+        for c in range(10):
+            if c== 5:
+                line.append(' ') if r==2 or r==7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)])
             line.append(best_action)
         format = len(line)*'{:8s}'
         print(format.format(*line))
@@ -204,5 +219,7 @@ def Q_learning():
 start_time = time.time()
 Q = Q_learning()
 see_action_values(Q)
+print('\n')
+see_policy(Q)
 print('\n')
 print(f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times}")

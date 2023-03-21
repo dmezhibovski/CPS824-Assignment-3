@@ -158,7 +158,6 @@ def choose_max_Q(Qs):
 
     return maxA, maxQ
 
-
 def see_action_values(Q):
     for r in range(10):
         line =[]
@@ -170,12 +169,26 @@ def see_action_values(Q):
         for c in range(10):
             if c== 5:
                 line.append(' ') if r==2 or r==7 else line.append('|')
-            best_action, best_action_value = choose_max_Q(Q[(9-r, c)],0)
-            # line.append(str(round(best_action_value,2))+' ')
-            line.append(best_action)
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)])
+            line.append(str(round(best_action_value,2))+' ')
         format = len(line)*'{:8s}'
         print(format.format(*line))
 
+def see_policy(Q):
+    for r in range(10):
+        line =[]
+        if r == 5:
+            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            format = len(line)*'{:8s}'
+            print(format.format(*line))
+        line = []
+        for c in range(10):
+            if c== 5:
+                line.append(' ') if r==2 or r==7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)])
+            line.append(best_action)
+        format = len(line)*'{:8s}'
+        print(format.format(*line))
 
 def choose_max_Q_double(Qs1, Qs2):
     maxA = ''
@@ -243,4 +256,9 @@ Q1, Q2 = double_Q_learning()
 see_action_values(Q1)
 print('----------------------------------------------------------------------------------------\n')
 see_action_values(Q2)
+print('\n')
+see_policy(Q1)
+print('----------------------------------------------------------------------------------------\n')
+see_policy(Q2)
+print('\n')
 print(f"Elsapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times_double}")

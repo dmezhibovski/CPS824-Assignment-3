@@ -118,7 +118,7 @@ class Environment():
 a = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-NUM_EPISODES = 50000
+NUM_EPISODES = 100000
 recorded_times = []
 
 standard_input = '1\n0\n'
@@ -142,11 +142,25 @@ def see_action_values(Q):
             if c== 5:
                 line.append(' ') if r==2 or r==7 else line.append('|')
             best_action, best_action_value = choose_max_Q(Q[(9-r, c)])
-            # line.append(str(round(best_action_value,2))+' ')
-            line.append(best_action)
+            line.append(str(round(best_action_value,2))+' ')
         format = len(line)*'{:8s}'
         print(format.format(*line))
 
+def see_policy(Q):
+    for r in range(10):
+        line =[]
+        if r == 5:
+            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            format = len(line)*'{:8s}'
+            print(format.format(*line))
+        line = []
+        for c in range(10):
+            if c== 5:
+                line.append(' ') if r==2 or r==7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)])
+            line.append(best_action)
+        format = len(line)*'{:8s}'
+        print(format.format(*line))
 
 def random_start_state():
     return (random.randint(0, 9), random.randint(0, 9))
@@ -241,7 +255,7 @@ def update_policy(episode, Q, policy):
 
 def mc_control():
     env = Environment(p1=user_input['p1'], p2=user_input['p2'])
-    Q = generate_matrix(-10)
+    Q = generate_matrix(-100)
     return_sum = generate_matrix(0)
     return_count = generate_matrix(0)
     policy = generate_matrix(0.25)
@@ -260,6 +274,25 @@ start_time = time.time()
 print('start')
 Q = mc_control()
 see_action_values(Q)
+print('\n')
+see_policy(Q)
 print('done')
 print(
     f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times}")
+
+
+def Q_to_2D(Q):
+    grid_size = 10
+    grid = [[0]*grid_size for x in range(grid_size)]
+    for state, action_dict in Q.items():
+        row, col = state
+        grid[row][col] = str(round(max(action_dict.values()),2))
+    grid.reverse()
+    return grid
+
+
+with open('mc.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerows(Q_to_2D(Q))
+
+print('done')
