@@ -118,7 +118,8 @@ class Environment():
 a = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
-NUM_EPISODES = 50000
+NUM_EPISODES = 100000
+MAX_EPISODE_DEPTH = 50000
 recorded_times = []
 
 standard_input = '1\n0\n'
@@ -132,15 +133,16 @@ for label in user_input_labels:
 
 def see_action_values(Q):
     for r in range(10):
-        line =[]
+        line = []
         if r == 5:
-            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            line = ['--------', '--------', '        ', '--------', '--------',
+                    '+-------', '--------', '--------', '        ', '--------', '--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
         for c in range(10):
-            if c== 5:
-                line.append(' ') if r==2 or r==7 else line.append('|')
+            if c == 5:
+                line.append(' ') if r == 2 or r == 7 else line.append('|')
             best_action, best_action_value = choose_max_Q(Q[(9-r, c)])
             # line.append(str(round(best_action_value,2))+' ')
             line.append(best_action)
@@ -184,8 +186,7 @@ def epsilon_greedy_policy(Q):
 def generate_episode(policy, env):
     episode = []
     state = random_start_state()
-    max_episode_depth = 2000
-    for _ in range(max_episode_depth):
+    for _ in range(MAX_EPISODE_DEPTH):
         cell_policy = policy[state].items()
         action = random.choices([x[0] for x in cell_policy], [
                                 x[1] for x in cell_policy])[0]
@@ -207,12 +208,13 @@ def process_policy(episode, Q, return_sum, return_count):
         G = GAMMA*G + reward
         episode_return_values.append([state, action, G])
     # episode_return_values.reverse()
-    for state, action ,reward in episode[::-1]:
-        if state!=(9,9) and  not state in previous_state_actions:
+    for state, action, reward in episode[::-1]:
+        if state != (9, 9) and not state in previous_state_actions:
             previous_state_actions.add(state)
-            return_sum[state][action]+=G
-            return_count[state][action]+=1
-            Q[state][action] = return_sum[state][action] / return_count[state][action]
+            return_sum[state][action] += G
+            return_count[state][action] += 1
+            Q[state][action] = return_sum[state][action] / \
+                return_count[state][action]
 
 
 def find_a_star(Q, state):
@@ -248,18 +250,17 @@ def mc_control():
     last_time = time.time()
     for i in range(NUM_EPISODES):
         episode = generate_episode(policy, env)
-        process_policy(episode, Q, return_sum,return_count)
+        process_policy(episode, Q, return_sum, return_count)
         update_policy(episode, Q, policy)
         time_delta = time.time() - last_time
         recorded_times.append((i, time_delta))
         last_time = time.time()
-    return Q 
+    return Q
 
 
 start_time = time.time()
 print('start')
 Q = mc_control()
 see_action_values(Q)
+print(f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes")
 print('done')
-print(
-    f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{recorded_times}")

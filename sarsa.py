@@ -115,13 +115,13 @@ class Environment():
 # ////////////////////////////////
 
 
-a = 0.1
-g = 0.9
+# ////////// GLOBAL VARIABLES ////////
+MAX_EPSILON = 0.1
+ENABLE_DECREASING_E = False
 EPSILON = 0.1
-NUM_EPISODES = 10000
+NUM_EPISODES = 100000
 ALPHA = 0.1
 GAMMA = 0.9
-recorded_times = []
 
 standard_input = '1\n0'
 user_input = {}
@@ -131,6 +131,10 @@ for label in user_input_labels:
     print(f'Enter a number for {label}')
     user_input[label] = float(input())
 
+
+# ////////////////////////////////
+#        START SARSA LOGIC
+# ////////////////////////////////
 
 def generate_matrix(initialized_value):
     new_matrix = {}
@@ -147,7 +151,7 @@ def random_start_state():
     return (random.randint(0, 9), random.randint(0, 9))
 
 
-def choose_max_Q(Qs,e=EPSILON):
+def choose_max_Q(Qs, e=EPSILON):
     maxA = ''
     maxQ = -1000
     actions = ['up', 'down', 'left', 'right']
@@ -164,78 +168,60 @@ def choose_max_Q(Qs,e=EPSILON):
 
 def see_action_values(Q):
     for r in range(10):
-        line =[]
+        line = []
         if r == 5:
-            line=['--------','--------','        ','--------','--------','+-------','--------','--------','        ','--------','--------']
+            line = ['--------', '--------', '        ', '--------', '--------',
+                    '+-------', '--------', '--------', '        ', '--------', '--------']
             format = len(line)*'{:8s}'
             print(format.format(*line))
         line = []
         for c in range(10):
-            if c== 5:
-                line.append(' ') if r==2 or r==7 else line.append('|')
-            best_action, best_action_value = choose_max_Q(Q[(9-r, c)],0)
+            if c == 5:
+                line.append(' ') if r == 2 or r == 7 else line.append('|')
+            best_action, best_action_value = choose_max_Q(Q[(9-r, c)], 0)
             # line.append(str(round(best_action_value,2))+' ')
             line.append(best_action)
         format = len(line)*'{:8s}'
         print(format.format(*line))
 
 
-
-def find_a_star(Q, state):
-    row, col = state
-    Q_at_cell = Q[(row, col)]
-    max_action = max(Q_at_cell.items(), key=lambda item: item[1])[0]
-    return max_action
+def epsilon_greedy_Q(Q_state):
+    if random.uniform(0, 1) < EPSILON:
+        return random.choices(list(Q_state.keys()))[0]
+    else:
+        return max(Q_state.items(), key=lambda item: item[1])[0]
 
 
 def sarsa():
-    env = Environment()
+    total_time_steps = 0
+    env = Environment(p1=user_input['p1'], p2=user_input['p2'])
     Q = generate_matrix(0)
-    last_time = time.time()
     for i in range(NUM_EPISODES):
-        starting_point = random_start_state()
-        state = starting_point
+        state = random_start_state()
+        best_action = epsilon_greedy_Q(Q[state])
         while True:
-            best_action, best_action_value = choose_max_Q(Q[state])
             move = env.agent_makes_decision(best_action, state)
             if state == (9, 9):
                 break
-            # if state == (9,0):
-            #     print(best_action)
-            state_prime = move['location']
-            max_next_action,max_next_action_value = choose_max_Q(Q[state_prime])
+            next_state = move['location']
+            next_action = epsilon_greedy_Q(Q[state])
             learning_step_value = ALPHA * \
-                (move['reward']+GAMMA*Q[state_prime]
-                 [max_next_action]-Q[state][best_action])
+                (move['reward']+GAMMA*Q[next_state]
+                 [next_action]-Q[state][best_action])
             Q[state][best_action] = Q[state][best_action] + learning_step_value
-            state = state_prime
-        time_delta = time.time() - last_time
-        recorded_times.append((i, time_delta))
-        last_time = time.time()
-    return Q
+            state = next_state
+            best_action = next_action
+            total_time_steps += 1
+            if ENABLE_DECREASING_E:
+                global EPSILON
+                EPSILON = MAX_EPSILON*(1 - (i/NUM_EPISODES))
+    return Q, total_time_steps
+
+# ////////////////////////////////
+#        END SARSA LOGIC
+# ////////////////////////////////
 
 
 start_time = time.time()
-Q = sarsa()
-see_action_values(Q)
-print(Q)
-# see_action_values(Q)
-print(
-    f"Elapsed time {time.time() - start_time} with {NUM_EPISODES} episodes and times of \n{len(recorded_times)}")
-
-
-def Q_to_2D(Q):
-    grid_size = 10
-    grid = [[0]*grid_size for x in range(grid_size)]
-    for state, action_dict in Q.items():
-        row, col = state
-        grid[row][col] = str(max(action_dict.values()))
-    grid.reverse()
-    return grid
-
-
-with open('output.csv', 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerows(Q_to_2D(Q))
-
-print('done')
+Q, steps = sarsa()
+print(f'done. Finished in {time.time() - start_time} with {steps} steps')

@@ -243,62 +243,7 @@ def double_Q_learning():
 #  START DOUBLE Q LEARNING LOGIC
 # ////////////////////////////////
 
-# ////////////////////////////////
-#        START REPORTING CODE
-# ////////////////////////////////
 
-
-def Q_to_2D(Q):
-    grid_size = 10
-    grid = [[0]*grid_size for x in range(grid_size)]
-    grid_name = [['']*grid_size for x in range(grid_size)]
-    for state, action_dict in Q.items():
-        row, col = state
-        grid[row][col] = str(max(action_dict.values()))
-        grid_name[row][col] = str(max(
-            action_dict.items(), key=lambda item: item[1])[0])
-    grid.reverse()
-    grid_name.reverse()
-    return grid, grid_name
-
-
-def save_data(Q, misc_arr, folder, name):
-    Q_data, policy = Q_to_2D(Q)
-    with open(f'{folder}/{name}Q.csv', 'w+', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        for csv_row in Q_data:
-            writer.writerow(csv_row)
-    with open(f'{folder}/{name}Pol.csv', 'w+', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        for csv_row in policy:
-            writer.writerow(csv_row)
-    with open(f'{folder}/{name}.txt', 'w') as txt_file:
-        txt_file.writelines(misc_arr)
-# ////////////////////////////////
-#      END REPORTING CODE
-# ////////////////////////////////
-
-
-# ------ ENTRY POINT ------------
-for decreasing_e in [False, True]:
-    if decreasing_e:
-        ENABLE_DECREASING_E = True
-        MAX_EPSILON = 0.1
-    else:
-        ENABLE_DECREASING_E = False
-        EPSILON = 0.1
-    for new_alpha in [0.05, 0.1, 0.2]:
-        ALPHA = new_alpha
-        run_start = time.time()
-        Q1, Q2, steps = double_Q_learning()
-        text = [f'Time passes {time.time() - run_start}\n',
-                f'Total number of steps is {steps}\n',
-                f'episode num: {NUM_EPISODES}\n',
-                f'p1 {user_input["p1"]}\n',
-                f'p2 {user_input["p2"]}\n',
-                f'Is using decrasing e {decreasing_e}\n',
-                f'Q: {Q1}']
-        save_data(Q1, text, folder='data',
-                  name=f'a={new_alpha}{decreasing_e}qLearn')
-
-print('done')
+start_time = time.time()
+Q1, Q2, steps = double_Q_learning()
+print(f'done. Finished in {time.time() - start_time} with {steps} steps')
